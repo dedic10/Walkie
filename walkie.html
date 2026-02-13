@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walkie-Talkie Pro | BUDBOY</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(72, 209, 204, 0.1) 0%, transparent 50%);
+            animation: backgroundPulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(120, 119, 198, 0.5);
+            letter-spacing: -1px;
+        }
+
+        .author {
+            color: #48d1cc;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        
+        .zendegi {
+            color: #48d1cc;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #48d1cc;
+            box-shadow: 0 0 0 3px rgba(72, 209, 204, 0.1);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            background: rgba(15, 12, 41, 0.9);
+            padding: 0 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .info-card {
+            background: rgba(72, 209, 204, 0.1);
+            border: 1px solid rgba(72, 209, 204, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 6px 0;
+        }
+
+        .info-card strong {
+            color: #48d1cc;
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #48d1cc;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status.talking {
+            background: rgba(239, 83, 80, 0.2);
+            color: #ef5350;
+            animation: none;
+        }
+
+        .status.listening {
+            background: rgba(72, 209, 204, 0.2);
+            color: #48d1cc;
+        }
+
+        .status.error {
+            background: rgba(239, 83, 80, 0.2);
+            color: #ef5350;
+            animation: errorPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes errorPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .ptt-button {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin: 24px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .ptt-button::before {
+            content: '🎤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -80%);
+            font-size: 48px;
+            opacity: 0.3;
+        }
+
+        .ptt-button .text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ptt-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(17, 153, 142, 0.4);
+        }
+
+        .ptt-button:active {
+            transform: scale(0.98);
+        }
+
+        .ptt-button.talking {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            animation: talkingPulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes talkingPulse {
+            0%, 100% { 
+                box-shadow: 0 10px 30px rgba(235, 51, 73, 0.5);
+            }
+            50% { 
+                box-shadow: 0 10px 50px rgba(235, 51, 73, 0.8),
+                           0 0 0 10px rgba(235, 51, 73, 0.2),
+                           0 0 0 20px rgba(235, 51, 73, 0.1);
+            }
+        }
+
+        .ptt-button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .users-list {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .users-list h3 {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .user-item {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 6px 0;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-item::before {
+            content: '●';
+            color: #38ef7d;
+            font-size: 12px;
+        }
+
+        .user-item.self {
+            border: 1px solid rgba(72, 209, 204, 0.3);
+        }
+
+        .instructions {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .instructions h4 {
+            color: #ffa726;
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .ptt-button {
+                height: 140px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📻 WALKIE-TALKIE</h1>
+            <div class="author">AUTHOR: BUDBOY </div>
+            <div class="zendegi">ZENDEGI APSENE PYAREKE TUM TUM MEREJANE</div>
+        </div>
+
+        <!-- Setup Section -->
+        <div class="section active" id="setupSection">
+            <div class="form-group">
+                <label for="username">Nama Anda</label>
+                <input type="text" id="username" placeholder="Masukkan nama Anda" />
+            </div>
+
+            <button class="btn" onclick="createRoom()">
+                🆕 Buat Room Baru
+            </button>
+
+            <div class="divider"><span>ATAU</span></div>
+
+            <div class="form-group">
+                <label for="roomId">Kode Room</label>
+                <input type="text" id="roomId" placeholder="Masukkan kode room untuk join" />
+            </div>
+
+            <button class="btn" onclick="joinRoom()">
+                🚪 Join Room
+            </button>
+
+            <div class="instructions">
+                <h4>📌 Cara Menggunakan</h4>
+                <ol>
+                    <li>Buat room baru atau join room yang sudah ada</li>
+                    <li>Bagikan kode room ke teman Anda</li>
+                    <li><strong>Tekan & tahan</strong> tombol hijau untuk bicara</li>
+                    <li><strong>Lepas tombol</strong> untuk berhenti bicara</li>
+                    <li>Gunakan headphone untuk hasil terbaik</li>
+                    <li><strong>Pastikan pakai HTTPS!</strong> (Ngrok/localhost)</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="section" id="chatSection">
+            <div class="info-card">
+                <p><strong>Nama:</strong> <span id="displayUsername"></span></p>
+                <p><strong>Room:</strong> <span id="displayRoomId"></span></p>
+            </div>
+
+            <div class="status" id="status">Siap berkomunikasi</div>
+
+            <button class="ptt-button" id="pttButton" 
+                    onmousedown="startTalking()" 
+                    onmouseup="stopTalking()"
+                    ontouchstart="startTalking(event)" 
+                    ontouchend="stopTalking(event)">
+                <div class="text">TEKAN UNTUK BICARA</div>
+            </button>
+
+            <div class="users-list">
+                <h3>👥 Pengguna Aktif (<span id="userCount">1</span>)</h3>
+                <div id="usersList"></div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="leaveRoom()">
+                🚪 Keluar dari Room
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ====================================
+        // WALKIE-TALKIE by BUDBOY
+        // ✅ INTERNET VERSION with PeerJS Cloud
+        // ====================================
+
+        let peer, myPeerId, myUsername, roomId;
+        let connections = {};
+        let myStream;
+        let isTalking = false;
+
+        function initializePeer() {
+            // ✅ FIX: Gunakan PeerJS Cloud Server untuk internet publik!
+            peer = new Peer({
+                host: '0.peerjs.com',     // ← PeerJS Cloud Server (Gratis!)
+                port: 443,
+                path: '/',
+                secure: true,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        // ✅ Tambah TURN server untuk NAT traversal
+                        { 
+                            urls: 'turn:0.peerjs.com:3478',
+                            username: 'peerjs',
+                            credential: 'peerjsp'
+                        }
+                    ]
+                }
+            });
+
+            peer.on('open', id => {
+                myPeerId = id;
+                console.log('✅ Connected to PeerJS Cloud!');
+                console.log('✅ Your Peer ID:', myPeerId);
+            });
+
+            peer.on('connection', conn => {
+                console.log('📞 Incoming connection from:', conn.peer);
+                setupConnection(conn);
+            });
+
+            peer.on('call', call => {
+                console.log('📞 Incoming call from:', call.peer);
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(t => t.stop());
+                        call.answer(new MediaStream());
+                        call.on('stream', remoteStream => {
+                            const audio = new Audio();
+                            audio.srcObject = remoteStream;
+                            audio.play().catch(e => console.log('Audio play error:', e));
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Microphone access error:', err);
+                    });
+            });
+
+            peer.on('error', err => {
+                console.error('❌ PeerJS Error:', err);
+                
+                // ✅ Better error messages
+                let errorMsg = 'Error: ';
+                if (err.type === 'peer-unavailable') {
+                    errorMsg = 'ERROR: PEER-UNAVAILABLE\nRoom tidak ditemukan atau sudah offline!';
+                } else if (err.type === 'network') {
+                    errorMsg = 'ERROR: NETWORK\nTidak bisa connect ke server!\nPastikan pakai HTTPS!';
+                } else if (err.type === 'disconnected') {
+                    errorMsg = 'ERROR: DISCONNECTED\nKoneksi terputus!';
+                } else {
+                    errorMsg = 'ERROR: ' + err.type;
+                }
+                
+                updateStatus(errorMsg, 'error');
+            });
+
+            peer.on('disconnected', () => {
+                console.log('⚠️ Disconnected from PeerJS Cloud');
+                updateStatus('Disconnected - Reconnecting...', 'error');
+                
+                // ✅ Auto-reconnect
+                setTimeout(() => {
+                    if (!peer.destroyed) {
+                        peer.reconnect();
+                    }
+                }, 3000);
+            });
+        }
+
+        function createRoom() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('❌ Masukkan nama!');
+                return;
+            }
+
+            myUsername = username;
+            updateStatus('Connecting to PeerJS Cloud...', '');
+            initializePeer();
+            
+            // ✅ Tunggu sampai Peer ID ready
+            const checkPeerReady = setInterval(() => {
+                if (myPeerId) {
+                    clearInterval(checkPeerReady);
+                    roomId = myPeerId;  // ✅ Room ID = Peer ID
+                    showChatSection();
+                    updateUsersList();
+                    updateStatus('Ready - Room Created!', '');
+                    console.log('🎉 Room created! Share this Room ID:', roomId);
+                }
+            }, 500);
+
+            // ✅ Timeout protection
+            setTimeout(() => {
+                clearInterval(checkPeerReady);
+                if (!myPeerId) {
+                    updateStatus('ERROR: Connection Timeout!', 'error');
+                    alert('❌ Gagal connect ke server!\n\nPastikan:\n1. Pakai HTTPS (Ngrok/localhost)\n2. Internet stabil\n3. Firewall tidak block PeerJS');
+                }
+            }, 10000);
+        }
+
+        function joinRoom() {
+            const username = document.getElementById('username').value.trim();
+            const room = document.getElementById('roomId').value.trim();
+
+            if (!username || !room) {
+                alert('❌ Masukkan nama dan room code!');
+                return;
+            }
+
+            myUsername = username;
+            roomId = room;
+
+            updateStatus('Connecting to PeerJS Cloud...', '');
+            initializePeer();
+
+            // ✅ Tunggu Peer ID ready, lalu connect
+            const checkPeerReady = setInterval(() => {
+                if (myPeerId) {
+                    clearInterval(checkPeerReady);
+                    
+                    console.log('Attempting to connect to room:', roomId);
+                    const conn = peer.connect(roomId);
+                    
+                    conn.on('error', err => {
+                        console.error('Connection error:', err);
+                        updateStatus('ERROR: Cannot connect to room!', 'error');
+                    });
+                    
+                    setupConnection(conn);
+                    showChatSection();
+                    updateStatus('Connecting to room...', '');
+                }
+            }, 500);
+
+            // ✅ Timeout protection
+            setTimeout(() => {
+                clearInterval(checkPeerReady);
+                if (!myPeerId) {
+                    updateStatus('ERROR: Connection Timeout!', 'error');
+                    alert('❌ Gagal connect ke server!\n\nPastikan:\n1. Pakai HTTPS (Ngrok/localhost)\n2. Internet stabil\n3. Room code benar');
+                }
+            }, 10000);
+        }
+
+        function setupConnection(conn) {
+            conn.on('open', () => {
+                console.log('✅ Connection established with:', conn.peer);
+                connections[conn.peer] = conn;
+                conn.send({ type: 'username', username: myUsername, peerId: myPeerId });
+                updateUsersList();
+                updateStatus('Connected!', '');
+            });
+
+            conn.on('data', data => {
+                if (data.type === 'username') {
+                    if (!connections[data.peerId]) connections[data.peerId] = conn;
+                    connections[data.peerId].username = data.username;
+                    console.log('User joined:', data.username);
+                    updateUsersList();
+                    broadcastUserList();
+                } else if (data.type === 'userlist') {
+                    Object.keys(data.users).forEach(peerId => {
+                        if (peerId !== myPeerId && !connections[peerId]) {
+                            console.log('Connecting to new peer:', peerId);
+                            const newConn = peer.connect(peerId);
+                            setupConnection(newConn);
+                        }
+                    });
+                } else if (data.type === 'talking') {
+                    updateStatus(data.username + ' talking...', 'listening');
+                } else if (data.type === 'stoptalk') {
+                    updateStatus('Ready', '');
+                }
+            });
+
+            conn.on('close', () => {
+                console.log('Connection closed with:', conn.peer);
+                delete connections[conn.peer];
+                updateUsersList();
+            });
+
+            conn.on('error', err => {
+                console.error('Connection error:', err);
+            });
+        }
+
+        function broadcastUserList() {
+            const users = { [myPeerId]: { username: myUsername } };
+            Object.keys(connections).forEach(id => {
+                if (connections[id].username) users[id] = { username: connections[id].username };
+            });
+            Object.values(connections).forEach(conn => {
+                if (conn.open) {
+                    try {
+                        conn.send({ type: 'userlist', users });
+                    } catch (e) {
+                        console.error('Error broadcasting user list:', e);
+                    }
+                }
+            });
+        }
+
+        function startTalking(e) {
+            if (e) e.preventDefault();
+            if (isTalking) return;
+            
+            isTalking = true;
+            document.getElementById('pttButton').classList.add('talking');
+            document.querySelector('.ptt-button .text').textContent = '🔴 TALKING';
+            updateStatus('You are talking...', 'talking');
+
+            // ✅ Broadcast talking status
+            Object.values(connections).forEach(conn => {
+                if (conn.open) {
+                    try {
+                        conn.send({ type: 'talking', username: myUsername });
+                    } catch (e) {
+                        console.error('Error sending talking status:', e);
+                    }
+                }
+            });
+
+            // ✅ Start audio stream
+            navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: true, 
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            })
+            .then(stream => {
+                myStream = stream;
+                
+                // ✅ Call all connected peers
+                Object.keys(connections).forEach(peerId => {
+                    try {
+                        const call = peer.call(peerId, stream);
+                        if (call) {
+                            call.on('stream', remoteStream => {
+                                const audio = new Audio();
+                                audio.srcObject = remoteStream;
+                                audio.play().catch(e => console.log('Audio play error:', e));
+                            });
+                            call.on('error', err => {
+                                console.error('Call error:', err);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error calling peer:', e);
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Microphone error:', err);
+                alert('❌ Microphone error!\n\nCheck:\n1. Microphone permission\n2. HTTPS/localhost\n3. Browser support');
+                stopTalking();
+            });
+        }
+
+        function stopTalking(e) {
+            if (e) e.preventDefault();
+            if (!isTalking) return;
+            
+            isTalking = false;
+            document.getElementById('pttButton').classList.remove('talking');
+            document.querySelector('.ptt-button .text').textContent = 'TEKAN UNTUK BICARA';
+            updateStatus('Ready', '');
+
+            // ✅ Broadcast stop talking
+            Object.values(connections).forEach(conn => {
+                if (conn.open) {
+                    try {
+                        conn.send({ type: 'stoptalk' });
+                    } catch (e) {
+                        console.error('Error sending stoptalk:', e);
+                    }
+                }
+            });
+
+            // ✅ Stop audio stream
+            if (myStream) {
+                myStream.getTracks().forEach(t => t.stop());
+                myStream = null;
+            }
+        }
+
+        function updateStatus(msg, cls) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.className = 'status ' + cls;
+        }
+
+        function updateUsersList() {
+            let count = 1;
+            let html = '<div class="user-item self">' + myUsername + ' (You)</div>';
+
+            Object.keys(connections).forEach(id => {
+                if (connections[id].username) {
+                    count++;
+                    html += '<div class="user-item">' + connections[id].username + '</div>';
+                }
+            });
+
+            document.getElementById('usersList').innerHTML = html;
+            document.getElementById('userCount').textContent = count;
+        }
+
+        function showChatSection() {
+            document.getElementById('setupSection').classList.remove('active');
+            document.getElementById('chatSection').classList.add('active');
+            document.getElementById('displayUsername').textContent = myUsername;
+            document.getElementById('displayRoomId').textContent = roomId;
+            document.getElementById('pttButton').disabled = false;
+
+            // ✅ Test microphone access
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    stream.getTracks().forEach(t => t.stop());
+                    console.log('✅ Microphone access granted');
+                })
+                .catch(err => {
+                    console.error('⚠️ Microphone access denied:', err);
+                    alert('⚠️ Microphone needed!\n\nPastikan:\n1. Izinkan akses microphone\n2. Pakai HTTPS (Ngrok/localhost)');
+                });
+        }
+
+        function leaveRoom() {
+            if (confirm('Keluar dari room?')) {
+                // ✅ Close all connections
+                Object.values(connections).forEach(c => {
+                    try {
+                        c.close();
+                    } catch (e) {
+                        console.error('Error closing connection:', e);
+                    }
+                });
+                
+                // ✅ Stop audio
+                if (myStream) {
+                    myStream.getTracks().forEach(t => t.stop());
+                }
+                
+                // ✅ Destroy peer
+                if (peer) {
+                    peer.destroy();
+                }
+
+                // ✅ Reset state
+                connections = {};
+                myStream = null;
+                isTalking = false;
+                myPeerId = null;
+                peer = null;
+
+                // ✅ Back to setup
+                document.getElementById('chatSection').classList.remove('active');
+                document.getElementById('setupSection').classList.add('active');
+                document.getElementById('roomId').value = '';
+                updateStatus('Disconnected', '');
+            }
+        }
+
+        // ✅ Cleanup on page close
+        window.addEventListener('beforeunload', e => {
+            if (peer && !peer.destroyed && Object.keys(connections).length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        console.log('📻 Walkie-Talkie by BUDBOY');
+        console.log('✅ Internet Version with PeerJS Cloud');
+        console.log('✅ Ready to use!');
+    </script>
+</body>
+</html>
